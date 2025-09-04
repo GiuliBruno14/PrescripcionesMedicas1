@@ -1,0 +1,132 @@
+extends ../layout
+
+block content
+    h1= pageTitle
+    .contenedorProfesionales
+        .formularioProfesionales
+            form(class="form-container", action="/profesionales/registrar", method="POST")
+                input(type="hidden", id="profesionalId", name="profesionalId", value="null")
+                h2 Gestión Profesionales
+                .form-group
+                    label(for="nombre") Nombre: 
+                    input(type="text", id="nombre", name="nombre")
+                    span#errorNombre.error Nombre debe tener entre 3 y 30 caracteres
+                    span#errorNombreNum.error Ingrese un nombre válido.
+
+                .form-group
+                    label(for="apellido") Apellido:  
+                    input(type="text", id="apellido", name="apellido")
+                    span#errorApellido.error Apellido debe tener entre 3 y 30 caracteres
+                    span#errorApellidoNum.error Ingrese un apellido válido.
+
+                .form-group
+                    label(for="documento") Documento:  
+                    input(type="number", id="documento", name="documento")
+                    span#errorDocumento.error Ingrese un documento válido.
+                    span#errorDocumentoL.error Ingrese un documento válido.
+                    span#errorDocumentoExistente.error Documento existente
+
+                .form-group
+                    label(for="profesion") Profesión:  
+                    select(id="profesion", name="profesion")
+                        option(value="") Selecciona una opción
+                        each profesion in profesiones
+                            option(value=profesion.id)=profesion.nombre
+                    span#errorProfesion.error Ingrese una profesión
+
+                .form-group
+                    label(for="especialidad") Especialidad: 
+                    select(id="especialidad", name="especialidad")
+                        option(value="") Selecciona una opción
+                    span#errorEspecialidad.error Ingrese una especialidad
+
+                .form-group     
+                    label(for="domicilio") Domicilio:  
+                    input(type="text", id="domicilio", name="domicilio")
+                    span#errorDomicilio.error Domicilio debe tener entre 3 y 100 caracteres
+                    span#errorDomicilioNum.error Ingrese un domicilio válido.
+
+                .form-group 
+                    label(for="matricula") Matrícula:  
+                    input(type="text", id="matricula", name="matricula")
+                    span#errorMatricula.error Ingrese una matrícula valida.
+                    span#errorMatriculaL.error Matrícula debe tener entre 3 y 30 caracteres
+                    span#errorMatriculaExistente.error Matrícula ya existente
+                
+                .form-group 
+                    label(for="idRefeps") Id Refeps:  
+                    input(type="text", id="idRefeps", name="idRefeps")
+                    span#errorIdRefeps.error Ingrese un Id Refeps válido
+                    span#errorIdRefepsExistente.error Id Refeps ya cargado
+
+                .form-group 
+                    label(for="fechaCaducidad") Fecha de Caducidad:  
+                    input(type="date", id="fechaCaducidad", name="fechaCaducidad", min=(new Date().toISOString().split('T')[0]))
+                    span#errorFechaCaducidad.error Ingrese una fecha válida.
+
+                button(type="submit", class="btn") Registrar Profesional
+
+        .lista
+            h2 Lista Profesionales
+            .buscador
+                form(id="searchForm", class="form-buscador", action="/profesionales/buscar", method="POST")
+                    .form-group
+                        label(for="searchTerm") Buscar:
+                        input(type="text", id="searchTerm", name="searchTerm", class="form-control")
+            if profesionales.length === 0
+                p No hay profesionales disponibles
+            else
+                ul#profesionalesList
+                    each profesional in profesionales
+                        li
+                            a(href=`/profesionales/detalle/${profesional.id}`)
+                                | #{profesional.nombre} #{profesional.apellido} - Matrícula: #{profesional.matricula}
+
+    script(src="/js/validacionesProfesionales.js")
+    script.
+        $(document).ready(function() {
+            var today = new Date().toISOString().split('T')[0];
+            
+            $('#profesion').change(function() {
+                var profesionId = $(this).val();
+                var $especialidadSelect = $('#especialidad');
+                $especialidadSelect.empty(); 
+
+                if (profesionId) {
+                    $.get('/profesionales/especialidades/' + profesionId, function(data) {
+                        data.forEach(function(especialidad) {
+                            $especialidadSelect.append('<option value="' + especialidad.id + '">' + especialidad.nombre + '</option>');
+                        });
+                    });
+                }
+            });
+            $('#searchTerm').on('input', function() {
+                var searchTerm = $(this).val();
+                $.ajax({
+                    url: '/profesionales/buscar',
+                    type: 'POST',
+                    data: { searchTerm: searchTerm },
+                    success: function(profesionales) {
+                        var $profesionalesList = $('#profesionalesList');
+                        $profesionalesList.empty(); 
+                        if (profesionales.length === 0) {
+                            $profesionalesList.append('<p>No hay profesionales disponibles</p>');
+                        } else {
+                            profesionales.forEach(function(profesional) {
+                                var listItem = `
+                                    <li>
+                                        <a href="/profesionales/detalle/${profesional.id}">
+                                            ${profesional.nombre} ${profesional.apellido} - Matricula: ${profesional.matricula}
+                                        </a>
+                                    </li>
+                                `;
+                                $profesionalesList.append(listItem);
+                            });
+                        }
+                    },
+                    error: function(err) {
+                        console.error('Error al buscar profesional', err);
+                    }
+                });
+            });
+        });

@@ -1,0 +1,154 @@
+extends ../layout
+
+block content
+    h1= pageTitle
+    .contenedorPacientes
+        .formulario
+            form(class="form-container", action=`/pacientes/actualizar/${paciente.id}`, method="POST")
+                input(type="hidden", id="pacienteId", name="pacienteId", value=paciente.id)
+                h2 Gestión Pacientes
+                .form-group
+                    label(for="nombre") Nombre:
+                    input(type="text", id="nombre", name="nombre", value=paciente.nombre)
+                    span#errorNombre.error Nombre debe tener entre 3 y 30 caracteres
+                    span#errorNombreNum.error Ingrese un nombre válido.
+
+                .form-group
+                    label(for="apellido") Apellido:
+                    input(type="text", id="apellido", name="apellido", value=paciente.apellido)
+                    span#errorApellido.error Apellido debe tener entre 3 y 30 caracteres
+                    span#errorApellidoNum.error Ingrese un apellido válido.
+
+                .form-group
+                    label(for="documento") Documento:
+                    input(type="number", id="documento", name="documento", value=paciente.documento)
+                    span#errorDocumento.error Ingrese un documento válido.
+                    span#errorDocumentoL.error Ingrese un documento válido.
+                    span#errorDocumentoExistente.error Documento existente.
+
+                .form-group
+                    label(for="fechaNacimiento") Fecha de Nacimiento:
+                    input(type="date", id="fechaNacimiento", name="fechaNacimiento", value=paciente.fecha_nacimiento.toISOString().split('T')[0])
+                    span#errorFechaN.error Ingrese una fecha de nacimiento válida.
+
+                .form-group
+                    label(for="genero") Sexo:
+                    select(id="genero", name="genero")
+                        option(value="") Selecciona una opción
+                        option(value="M", selected=paciente.sexo === 'M') Masculino
+                        option(value="F", selected=paciente.sexo === 'F') Femenino
+                        option(value="O", selected=paciente.sexo === 'O') Otro
+                        option(value="D", selected=paciente.sexo === 'D') Desconocido
+                    span#errorGenero.error Debe seleccionar una opción
+
+                .form-group
+                    label(for="obrasocial") Obra Social:
+                    select(id="obrasocial", name="obrasocial[]", multiple)
+                        each obrasocial in obrasSociales
+                            option(value=obrasocial.id, selected=(pacienteOSid.includes(obrasocial.id) ? 'selected' : undefined))= obrasocial.nombre
+                    span#errorObraS.error Debe seleccionar al menos una opción
+
+                .form-group#plan-container
+                    label Plan:
+                    each obraSocialId in pacienteOSid
+                        if obraSocialId !== 'null'
+                            - const obraSocial = obrasSociales.find(os => os.id === obraSocialId)
+                            div(class="obra-social-container", id=`container-${obraSocialId}`)
+                                label(for=`plan-${obraSocialId}`) Plan para #{obraSocial.nombre}:
+                                select(id=`plan-${obraSocialId}`, name="plan[]", class="form-control plan-select")
+                                    option(value="") Selecciona una opción
+                                    each plan in planes.filter(plan => plan.id_obrasocial === obraSocialId)
+                                        if pacientePid.includes(plan.id)
+                                            option(value=plan.id, selected=true)= plan.nombre
+                                        else
+                                            option(value=plan.id)= plan.nombre
+                                    if planes.filter(plan => plan.id_obrasocial === obraSocialId).length == 0
+                                        option(value="null", selected=true) Sin plan
+
+                .form-group
+                    label(for="estado") Estado:
+                    input(type="checkbox", id="estado", name="estado", class="form-check-input", checked=paciente.estado ? true : false)
+                    
+                button(type="submit", class="btn") Guardar cambios
+
+    script(src="/js/validacionesPacientes.js")
+    script.
+        $(document).ready(function() {
+            $('#obrasocial').select2({
+                placeholder: "Selecciona una o más opciones",
+                allowClear: true,
+            });
+            const pacientePid = !{JSON.stringify(pacientePid)};
+            
+            function addPlanSelect(obraSocialId, obraSocialName, plans) {
+                if (!$(`#container-${obraSocialId}`).length) {
+                    const $planContainer = $('<div>').addClass('plan-container-item').attr('id', `container-${obraSocialId}`);
+                    const $label = $('<label>').text('Plan para ' + obraSocialName + ':');
+                    const $planSelect = $('<select>').attr({
+                        name: 'plan[]',
+                        class: 'form-control plan-select',
+                        id: `plan-${obraSocialId}`
+                    });
+
+                    $planSelect.append('<option value="">Selecciona una opción</option>');
+                    plans.forEach(function(plan) {
+                        const isSelected = pacientePid.includes(plan.id) && plan.obrasocial_id == obraSocialId ? 'selected' : '';
+                        $planSelect.append(`<option value="${plan.id}" ${isSelected}>${plan.nombre}</option>`);
+                    });
+
+                    $planContainer.append($label);
+                    $planContainer.append($planSelect);
+                    $planContainer.append('<span class="error" id="errorPlan">Debe seleccionar una opción.</span>');
+                    $('#plan-container').append($planContainer);
+                }
+            }
+
+            // Manejar el evento de cambio en el selector de obras sociales
+            $('#obrasocial').change(function() {
+                const obraSocialIds = $(this).val();
+                const selectedPlanIds = {};
+
+                // Guardar las selecciones actuales de los planes
+                $('.plan-select').each(function() {
+                    selectedPlanIds[$(this).attr('id').split('-')[1]] = $(this).val();
+                });
+
+                // Limpiar los selectores de plan actuales
+                $('#plan-container').empty();
+
+                if (obraSocialIds.length === 0) {
+                    return;
+                }
+
+                // Manejar las obras sociales seleccionadas
+                obraSocialIds.forEach(function(obraSocialId) {
+                    if (obraSocialId !== 'null') {
+                        const obraSocialName = $('#obrasocial option[value="' + obraSocialId + '"]').text();
+                        // Obtener los planes correspondientes a la obra social
+                        $.get('/pacientes/planes/' + obraSocialId, function(data) {
+                            // Agregar dinámicamente el selector de plan para la obra social
+                            addPlanSelect(obraSocialId, obraSocialName, data);
+                            // Restaurar las selecciones previas si están disponibles
+                            if (selectedPlanIds[obraSocialId]) {
+                                $(`#plan-${obraSocialId}`).val(selectedPlanIds[obraSocialId]).trigger('change');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Configuración inicial de los selectores de plan basada en las obras sociales seleccionadas inicialmente
+            const obraSocialIds = $('#obrasocial').val();
+            if (obraSocialIds.length > 0) {
+                obraSocialIds.forEach(function(obraSocialId) {
+                    if (obraSocialId !== 'null') {
+                        const obraSocialName = $('#obrasocial option[value="' + obraSocialId + '"]').text();
+                        // Obtener los planes correspondientes a la obra social
+                        $.get('/pacientes/planes/' + obraSocialId, function(data) {
+                            // Agregar dinámicamente el selector de plan para la obra social
+                            addPlanSelect(obraSocialId, obraSocialName, data);
+                        });
+                    }
+                });
+            }
+        });

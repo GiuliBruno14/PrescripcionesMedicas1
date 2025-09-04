@@ -1,0 +1,151 @@
+extends ../layout
+
+block content
+    h1= pageTitle
+    .contenedorPacientes
+        .formularioPacientes
+            form(class="form-container", action="/pacientes/registrar", method="POST")
+                input(type="hidden", id="pacienteId", name="pacienteId", value="null")
+                h2 Gestión Pacientes
+                .form-group
+                    label(for="nombre") Nombre: 
+                    input(type="text", id="nombre", name="nombre")
+                    span#errorNombre.error Nombre debe tener entre 3 y 30 caracteres
+                    span#errorNombreNum.error Ingrese un nombre válido.
+
+                .form-group
+                    label(for="apellido") Apellido:  
+                    input(type="text", id="apellido", name="apellido")
+                    span#errorApellido.error Apellido debe tener entre 3 y 30 caracteres
+                    span#errorApellidoNum.error Ingrese un apellido válido.
+
+
+                .form-group
+                    label(for="documento") Documento:  
+                    input(type="number", id="documento", name="documento")
+                    span#errorDocumento.error Ingrese un documento válido.
+                    span#errorDocumentoL.error Ingrese un documento válido.
+                    span#errorDocumentoExistente.error Documento existente
+
+                .form-group
+                    label(for="fechaNacimiento") Fecha de Nacimiento:  
+                    input(type="date", id="fechaNacimiento", name="fechaNacimiento", min="1900-01-01", max=(new Date().toISOString().split('T')[0]))
+                    span#errorFechaN.error Ingrese una fecha de nacimiento válida.
+
+                .form-group
+                    label(for="genero") Sexo:  
+                    select(id="genero", name="genero")
+                        option(value="") Selecciona una opción
+                        option(value="M") Masculino
+                        option(value="F") Femenino
+                        option(value="O") Otro
+                        option(value="D") Desconocido
+                    span#errorGenero.error Debe seleccionar una opción
+
+                .form-group
+                    label(for="obrasocial") Obra Social:
+                    select(id="obrasocial", name="obrasocial[]", multiple)
+                        each obrasocial in obrasSociales
+                            option(value=obrasocial.id)= obrasocial.nombre
+                    span#errorObraS.error Debe seleccionar al menos una opción
+
+                .form-group
+                    label(for="plan") Plan: 
+                    div#plan-container
+                       
+
+                button(type="submit", class="btn") Registrar Paciente
+
+        .lista
+            h2 Lista Pacientes
+            .buscador
+                form(id="searchForm", class="form-buscador", action="/pacientes/buscar", method="POST")
+                    .form-group
+                        label(for="searchTerm") Buscar:
+                        input(type="text", id="searchTerm", name="searchTerm", class="form-control")
+            if pacientes.length === 0
+                p No hay pacientes disponibles
+            else
+                ul#pacienteList
+                    each paciente in pacientes
+                        li
+                            a(href=`/pacientes/detalle/${paciente.id}`)
+                                | #{paciente.nombre} #{paciente.apellido} - DNI: #{paciente.documento}
+    
+    script(src="/js/validacionesPacientes.js")
+    script.
+        $(document).ready(function() {
+            $('#obrasocial').select2({
+                placeholder: "Selecciona una o más opciones",
+                allowClear: true,
+            });
+            $('#genero').select2({
+                placeholder: "Selecciona una opcion",
+                allowClear: true,
+            })
+
+            function addPlanSelect(obraSocialId, obraSocialName, plans) {
+                var $planContainer = $('<div>').addClass('plan-container-item');
+                var $label = $('<label>').text('Plan para ' + obraSocialName + ':');
+                var $planSelect = $('<select>').attr({
+                    name: 'plan[]',
+                    class: 'form-control plan-select'
+                });
+                $planSelect.append('<option value="">Selecciona una opción</option>');
+                plans.forEach(function(plan) {
+                    $planSelect.append('<option value="' + plan.id + '">' + plan.nombre + '</option>');
+                });
+
+                $planContainer.append($label);
+                $planContainer.append($planSelect);
+                $planContainer.append('<span class="error" id="errorPlan">Debe seleccionar una opción.</span>');
+                $('#plan-container').append($planContainer);
+            }
+
+            $('#obrasocial').change(function() {
+                var obraSocialIds = $(this).val();
+                $('#plan-container').empty(); // Vaciar el contenedor de planes
+
+                if (obraSocialIds.length > 0) {
+                    obraSocialIds.forEach(function(obraSocialId) {
+                        var obraSocialName = $('#obrasocial option[value="' + obraSocialId + '"]').text();
+                        if (obraSocialId !== 'null') {
+                            $.get('/pacientes/planes/' + obraSocialId, function(data) {
+                                addPlanSelect(obraSocialId, obraSocialName, data);
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#searchTerm').on('input', function() {
+                var searchTerm = $(this).val();
+                $.ajax({
+                    url: '/pacientes/buscar',
+                    type: 'POST',
+                    data: { searchTerm: searchTerm },
+                    success: function(pacientes) {
+                        var $pacienteList = $('#pacienteList');
+                        $pacienteList.empty(); 
+                        
+                        if (pacientes.length === 0) {
+                            $pacienteList.append('<p>No hay pacientes disponibles</p>');
+                        } else {
+                            pacientes.forEach(function(paciente) {
+                                var listItem = `
+                                    <li>
+                                        <a href="/pacientes/detalle/${paciente.id}">
+                                            ${paciente.nombre} ${paciente.apellido} - DNI: ${paciente.documento}
+                                        </a>
+                                    </li>
+                                `;
+                                $pacienteList.append(listItem);
+                            });
+                        }
+                    },
+                    error: function(err) {
+                        console.error('Error al buscar paciente', err);
+                    }
+                });
+            });
+        });

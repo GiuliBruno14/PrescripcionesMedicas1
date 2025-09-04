@@ -1,0 +1,73 @@
+extends ../layout
+
+block content
+    h1= medicamento.nombre_generico
+    .contenedorMedicamentos
+        .formularioModificar
+            form(class="form-container", action=`/medicamentos/actualizar/${medicamento.id}`, method="POST")
+                input(type="hidden", id="medicamentoId", name="medicamentoId", value=medicamento.id)
+                h2 Gestión Medicamentos
+                .form-group
+                    label(for="nombreGenerico") Nombre Genérico:
+                    input(type="text", id="nombreGenerico", name="nombreGenerico", value=medicamento.nombre_generico)
+                    span#errorNombreG.error Nombre Genérico debe tener entre 3 y 30 caracteres
+                    span#errorNombreGNum.error Ingrese un nombre válido.
+                    span#errorNombreGRepetido.error Nombre de medicamento repetido.
+
+                .form-group
+                    label(for="concentracion") Concentración:
+                    select(id="concentracion", name="concentracion[]", multiple)
+                        each concentracion in concentraciones
+                            option(value=concentracion.id, selected=(concentracionesId.includes(concentracion.id) ? 'selected' : undefined))= `${concentracion.concentracion} ${concentracion.unidad}`
+                    span#errorConcentracion.error Debe seleccionar al menos una opción de concentración
+
+                .form-group
+                    label(for="formaFarmaceutica") Forma Farmacéutica:
+                    select(id="formaFarmaceutica", name="formaFarmaceutica[]", multiple)
+                        each forma_farmaceutica in formasFarmaceuticas
+                            option(value=forma_farmaceutica.id, selected=(formasFarmaceuticasId.includes(forma_farmaceutica.id) ? 'selected' : undefined))= forma_farmaceutica.forma_farmaceutica
+                    span#errorFormaFarmaceutica.error Debe seleccionar al menos una opción de forma farmacéutica
+
+                .form-group
+                    label(for="presentacion") Presentación:
+                    select(id="presentacion", name="presentacion[]", multiple)
+                        each presentacion in presentaciones 
+                            option(value=presentacion.id, selected=(presentacionesId.includes(presentacion.id) ? 'selected' : undefined))= presentacion.presentacion
+                    span#errorPresentacion.error Debe seleccionar al menos una opción de presentación
+
+                .form-group
+                    label(for="nombreComercial") Nombre Comercial:
+                    input(type="text", id="nombreComercial", name="nombreComercial", value=medicamento.nombre_comercial)
+
+                .form-group
+                    label(for="categoria") Categoría:
+                    select(id="categoria", name="categoria")
+                        each categoria in categorias    
+                            option(value=categoria.id, selected=(categoria.id == medicamento.categoria ? 'selected' : undefined))= categoria.categoria
+                    span#errorCategoria.error Debe seleccionar una opción de categoría
+
+                .form-group
+                    label(for="familia") Familia:
+                    select(id="familia", name="familia")
+                        each familia in familias 
+                            option(value=familia.id, selected=(familia.id == medicamento.familia ? 'selected' : undefined))= familia.familia
+                    span#errorFamilia.error Debe seleccionar una opción de familia
+
+                .form-group
+                    label(for="estado") Estado:
+                    input(type="checkbox", id="estado", name="estado", class="form-check-input", checked=medicamento.estado ? true : false)
+
+                button(type="submit", class="btn") Guardar cambios
+
+    script(src="/js/validacionesMedicamentos.js")
+    script.
+        $(document).ready(function() {
+            $('#concentracion, #formaFarmaceutica, #presentacion').select2({
+                placeholder: "Selecciona una o más opciones",
+                allowClear: true,
+            });
+            $('#categoria, #familia').select2({
+                placeholder: "Selecciona una opción",
+                allowClear: true,
+            });
+        });

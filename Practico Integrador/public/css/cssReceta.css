@@ -1,0 +1,76 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 800px;
+}
+
+.pdf {
+    font-family: Arial, sans-serif;
+}
+
+.prescription-header {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.containerReceta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.section {
+    flex: 1 1 100%;
+    margin-bottom: 20px;
+}
+
+.patient-info, .professional-info, .prescription-details {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+h3 {
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 18px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+p {
+    margin: 5px 0;
+    color: #333;
+}
+
+.prescription-details ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.prescription-details ul li {
+    margin-bottom: 10px;
+    background: #e6f7ff;
+    padding: 10px;
+    border-radius: 3px;
+    border: 1px solid #b3e0ff;
+}
+
+.prescription-details h3 {
+    margin-top: 30px;
+}

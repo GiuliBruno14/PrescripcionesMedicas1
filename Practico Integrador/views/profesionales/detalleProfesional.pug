@@ -1,0 +1,91 @@
+extends ../layout
+
+block content
+    h1= pageTitle
+    .contenedorProfesionales
+        .formulario
+            form(class="form-container", action=`/profesionales/actualizar/${profesional.id}`, method="POST")
+                input(type="hidden", id="profesionalId", name="profesionalId", value=profesional.id)
+                h2 Gestión Profesionales
+                .form-group
+                    label(for="nombre") Nombre: 
+                    input(type="text", id="nombre", name="nombre",value=profesional.nombre)
+                    span#errorNombre.error Nombre debe tener entre 3 y 30 caracteres
+                    span#errorNombreNum.error Ingrese un nombre válido.
+
+                .form-group
+                    label(for="apellido") Apellido:  
+                    input(type="text", id="apellido", name="apellido",value=profesional.apellido)
+                    span#errorApellido.error Apellido debe tener entre 3 y 30 caracteres
+                    span#errorApellidoNum.error Ingrese un apellido válido.
+
+                .form-group
+                    label(for="documento") Documento:  
+                    input(type="number", id="documento", name="documento",value=profesional.documento)
+                    span#errorDocumento.error Ingrese un documento válido.
+                    span#errorDocumentoL.error Ingrese un documento válido.
+                    span#errorDocumentoExistente.error Documento existente
+
+                .form-group
+                    label(for="profesion") Profesión:  
+                    select(id="profesion", name="profesion")
+                        option(value="") Selecciona una opción
+                        each profesion in profesiones
+                            option(value=profesion.id, selected=profesional.profesion==profesion.id)=profesion.nombre
+                    span#errorProfesion.error Ingrese una profesión
+
+                .form-group
+                    label(for="especialidad") Especialidad: 
+                    select(id="especialidad", name="especialidad")
+                        option(value="") Selecciona una opción
+                        each especialidad in especialidades 
+                            option(value=especialidad.id selected=profesional.especialidad==especialidad.id)=especialidad.nombre
+                    span#errorEspecialidad.error Ingrese una especialidad
+
+                .form-group
+                    label(for="domicilio") Domicilio:  
+                    input(type="text", id="domicilio", name="domicilio",value=profesional.domicilio)
+                    span#errorDomicilio.error Domicilio debe tener entre 3 y 100 caracteres
+                    span#errorDomicilioNum.error Ingrese un domicilio válido.
+
+                .form-group 
+                    label(for="matricula") Matrícula:  
+                    input(type="text", id="matricula", name="matricula",value=profesional.matricula)
+                    span#errorMatricula.error Ingrese una matrícula valida.
+                    span#errorMatriculaL.error Matrícula debe tener entre 3 y 30 caracteres
+                    span#errorMatriculaExistente.error Matrícula ya existente
+
+                .form-group 
+                    label(for="idRefeps") Id Refeps:  
+                    input(type="text", id="idRefeps", name="idRefeps", value=profesional.id_REFEPS)
+                    span#errorIdRefeps.error Ingrese un Id Refeps válido
+                    span#errorIdRefepsExistente.error Id Refeps ya cargado
+
+                .form-group
+                    label(for="fechaCaducidad") Fecha de Caducidad:  
+                    input(type="date", id="fechaCaducidad", name="fechaCaducidad",value=profesional.fecha_caducidad.toISOString().split('T')[0], min=(new Date().toISOString().split('T')[0]))
+
+                .form-group
+                    label(for="estado") Estado:
+                    input(type="checkbox", id="estado", name="estado", class="form-check-input",checked=profesional.estado ? true : false)
+                    span#errorFechaCaducidad.error Ingrese una fecha válida.
+
+                button(type="submit", class="btn") Actualizar Profesional
+
+    script(src="/js/validacionesProfesionales.js")
+    script.
+        $(document).ready(function() {
+            $('#profesion').change(function() {
+                var profesionId = $(this).val();
+                var $especialidadSelect = $('#especialidad');
+                $especialidadSelect.empty();
+
+                if (profesionId) {
+                    $.get('/profesionales/especialidades/' + profesionId, function(data) {
+                        data.forEach(function(especialidad) {
+                            $especialidadSelect.append('<option value="' + especialidad.id + '">' + especialidad.nombre + '</option>');
+                        });
+                    });
+                }
+            });
+        });

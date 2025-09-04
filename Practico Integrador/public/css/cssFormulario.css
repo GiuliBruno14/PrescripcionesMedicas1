@@ -1,0 +1,226 @@
+.form-container {
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.form-buscador {
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  float: right;
+}
+
+.form-buscador .form-group {
+  display: flex;
+  align-items: center;
+}
+
+.form-buscador .form-group label {
+  margin-right: 10px;
+  width: auto;
+}
+
+.form-buscador input {
+  margin-right: 10px;
+  height: 30px;
+}
+
+.form-title {
+  text-align: center;
+  padding: auto;
+  margin-bottom: 20px;
+}
+
+.form-container h1 {
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.form-group label {
+  margin-top: 5px;
+  width: 200px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="checkbox"],
+.form-group input[type="date"],
+.form-group textarea,
+.form-group select {
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  padding: 5px;
+  margin-top: 5px;
+}
+
+.form-group button[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-left: 5px;
+
+}
+
+.form-group button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btn_buscar {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn_buscar img {
+  width: 15px;
+  height: 15px;
+}
+
+.btn-elimnar button {
+  width: 15px;
+  height: 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.error {
+  display: none;
+  color: red;
+  margin-left: 10px;
+  font-size: 10px;
+}
+
+.campoerror {
+  border: 2px solid red;
+}
+
+/* Estilos select2 */
+
+.select2-container {
+  width: 170px !important;
+  font-size: 12px;
+}
+
+.select2-container .select2-selection--multiple {
+  height: auto !important;
+  max-height: 40px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  font-size: 12px !important;
+  margin-right: 10px;
+  margin: 5px;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+  padding: 1px !important;
+  line-height: 1.2 !important;
+  font-size: 12px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+  border-color: #007bff transparent transparent !important;
+}
+
+.select2-container--open .select2-selection--single .select2-selection__arrow b {
+  border-color: transparent transparent #007bff !important;
+}
+
+.select2-container--open .select2-selection--single {
+  border-color: #007bff !important;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5) !important;
+  font-size: 12px !important;
+}
+
+.select2-container--open.select2-container--above .select2-selection--single {
+  border-radius: 5px 5px 0 0 !important;
+}
+
+.select2-container--open.select2-container--below .select2-selection--single {
+  border-radius: 0 0 5px 5px !important;
+}
+
+.select2-results__option {
+  padding: 8px !important;
+}
+
+.select2-results__option[aria-selected=true] {
+  background-color: #007bff !important;
+  color: #fff !important;
+}
+
+.select2-results__option:hover {
+  background-color: #007bff !important;
+  color: #fff !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: #007bff !important;
+  color: #fff !important;
+}
+
+.select2-selection--multiple {
+  border-radius: 5px !important;
+  border: 1px solid #007bff !important;
+  padding: 5px !important;
+  height: auto !important;
+}
+
+.select2-selection--single {
+  border-radius: 5px !important;
+  border: 1px solid #007bff !important;
+  padding: 5px !important;
+  height: auto !important;
+}
+
+.select2-selection__choice {
+  border-radius: 5px !important;
+  background-color: #007bff !important;
+  color: #fff !important;
+  padding: 3px 5px !important;
+  margin-right: 5px !important;
+  font-size: 12px !important;
+}
+
+.select2-selection__choice__remove {
+  margin-left: 5px !important;
+  color: #fff !important;
+}

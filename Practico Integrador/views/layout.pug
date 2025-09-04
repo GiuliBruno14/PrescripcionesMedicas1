@@ -1,0 +1,86 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title= pageTitle ? `${pageTitle} - Recetario Médico` : "Recetario Médico"
+    title Mi Aplicación
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js")
+    link(rel="stylesheet", href="/css/cssFormulario.css")
+    link(rel="stylesheet", href="/css/cssLayout.css")
+    link(rel="stylesheet", href="/css/csslistaMedicamentos.css")
+    link(rel="stylesheet", href="/css/cssPrescripcionesTabla.css")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css")
+    link(rel="stylesheet", href="/css/cssReceta.css")
+    link(rel="stylesheet", href= "/css/cssLogin.css")
+    link(rel="stylesheet", href="/css/cssIndex.css")
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js")
+    script.
+      document.addEventListener('DOMContentLoaded', function() {
+        const userMenu = document.querySelector('.user-menu ul li');
+        if (userMenu && userMenu.querySelector('.dropdown')) {
+          userMenu.addEventListener('click', function() {
+            const dropdown = this.querySelector('.dropdown');
+            if (dropdown.style.display === 'block') {
+              dropdown.style.display = 'none';
+            } else {
+              dropdown.style.display = 'block';
+            }
+          });
+
+          document.addEventListener('click', function(event) {
+            if (!userMenu.contains(event.target)) {
+              const dropdown = userMenu.querySelector('.dropdown');
+              if (dropdown) {
+                dropdown.style.display = 'none';
+              }
+            }
+          });
+        }
+      });
+
+  body
+    .contenedor
+      header
+        .titulo
+          h1 Recetario Médico
+          .nav
+            .nav2
+              nav
+                ul
+                  li
+                    a(href="/inicio") Inicio
+                  li
+                    a(href="/medicamentos" class= (userRole !== 'admin' ? 'disabled-link' : '')) Medicamentos
+                  li 
+                    a(href="/prestaciones" class= (userRole !== 'admin' ? 'disabled-link' : '')) Prestaciones
+                  li
+                    a(href="/pacientes" class= (userRole !== 'admin' && userRole !== 'profesional' ? 'disabled-link' : '')) Pacientes
+                  li 
+                    a(href="/profesionales" class= (userRole !== 'admin' ? 'disabled-link' : '')) Profesionales
+                  li 
+                    a(href="/prescripciones" class= (userRole !== 'profesional' ? 'disabled-link' : '')) Prescripciones
+            .user-menu
+              if username
+                ul
+                  li
+                    | Bienvenido, 
+                    if userRole === 'profesional'
+                      | #{nombre} #{apellido}
+                    else
+                      | #{username}
+                    .dropdown
+                      a(href="/logout") Cerrar sesión
+                      if userRole == 'admin'
+                        a(href="/registro") Registrar usuario   
+              else
+                ul
+                  li
+                    a(href="/") Iniciar sesión
+        
+      .body             
+        block content
+    footer
+      p Derechos reservados © 2024

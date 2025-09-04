@@ -1,0 +1,68 @@
+extends ../layout
+
+block content
+    .content
+        .pdf
+            h2.prescription-header Prescripción Médica ID: #{prescripcion.id}
+            .containerReceta
+                .section
+                    .patient-info
+                        h3 Datos del Paciente
+                        p Nombre: #{paciente.nombre} #{paciente.apellido}
+                        p DNI: #{paciente.documento}
+                        p Fecha de Nacimiento #{paciente.fecha_nacimiento}
+                        p Sexo: #{paciente.sexo}
+                        p Obra Social: #{paciente.obraSocial} 
+                        p Plan: #{paciente.plan}
+                        // Otros datos del paciente
+
+                .section
+                    .professional-info
+                        h3 Datos del Profesional
+                        p Nombre: #{profesional.nombre} #{profesional.apellido}
+                        p DNI: #{profesional.documento}
+                        p Profesión: #{profesional.profesion}
+                        p Especialidad: #{profesional.especialidad}
+                        p Domicilio: #{profesional.domicilio}
+                        p Matrícula: #{profesional.matricula}
+
+                .section
+                    .prescription-details
+                        h3 Detalles de la Prescripción
+                        p Diagnóstico: #{prescripcion.diagnostico}
+                        p Fecha: #{prescripcion.fechaPrescripcion}
+                        if prescripcion.vigencia
+                            p Vigencia: #{prescripcion.vigencia}
+                        else
+                            p Vigencia: No especificada
+                        if medicamentos && medicamentos.length > 0
+                            h3 Detalles de los Medicamentos
+                            ul
+                                each m in medicamentos
+                                    li #{m.nombre_generico}: #{m.concentracion} #{m.unidad} #{m.formaFarmaceutica} #{m.presentacion}. Dosis: #{m.cantidad} cada #{m.intervalo} por #{m.duracion}
+                        if prestaciones && prestaciones.length > 0
+                            h3 Detalles de las Prestaciones
+                            ul 
+                                each p in prestaciones 
+                                    li 
+                                        | #{p.nombre}: #{p.indicacion}. 
+                                        if p.lado
+                                            | Lado: #{p.lado}.
+                                        | Justificación: #{p.justificacion}
+                        if prescripcion.observaciones 
+                            h3 Observaciones:
+                            p #{prescripcion.observaciones}
+        button(type="button" class="btn btn-primary" id="btnpdf" onclick=`generarPDF('${prescripcion.id}')`) Generar PDF
+
+    script(src="/js/jspdf.min.js")
+    script.
+
+        function generarPDF(prescripcionId) {
+            const pdf = document.querySelector(".content").cloneNode(true);
+            const btn = pdf.querySelector("#btnpdf");
+            pdf.removeChild(btn);
+            const fileName = `prescripcion_medica_${prescripcionId}.pdf`;
+            html2pdf()
+                .from(pdf)
+                .save(fileName);
+        }

@@ -1,0 +1,122 @@
+extends ../layout
+
+block content
+    - var pageTitle = "Medicamentos"
+    h1= pageTitle
+    .contenedorMedicamentos
+        .formulario
+            form(name="medicamentos",class="form-container", action="/medicamentos/registrar", method="POST")
+                input(type="hidden", id="medicamentoId", name="medicamentoId", value="null")
+                h2 Gestión Medicamentos
+                .form-group
+                    label(for="nombreGenerico") Nombre Genérico: 
+                    input(type="text", id="nombreGenerico", name="nombreGenerico")
+                    span#errorNombreG.error Nombre Genérico debe tener entre 3 y 30 caracteres
+                    span#errorNombreGNum.error Ingrese un nombre válido.
+                    span#errorNombreGRepetido.error Nombre de medicamento repetido.
+
+                .form-group
+                    label(for="concentracion") Concentración:  
+                    select(id="concentracion", name="concentracion[]", multiple)
+                        each concentracion in concentraciones
+                            option(value=concentracion.id)= `${concentracion.concentracion} ${concentracion.unidad}`
+                    span#errorConcentracion.error Debe seleccionar al menos una opción de concentración
+
+                .form-group
+                    label(for="formaFarmaceutica") Forma Farmacéutica:
+                    select(id="formaFarmaceutica", name="formaFarmaceutica[]", multiple)
+                        each formafarmaceutica in formasFarmaceuticas
+                            option(value=formafarmaceutica.id)= formafarmaceutica.forma_farmaceutica
+                    span#errorFormaFarmaceutica.error Debe seleccionar al menos una opción de forma farmaceutica
+
+                .form-group
+                    label(for="presentacion") Presentación: 
+                    select(id="presentacion", name="presentacion[]", multiple)
+                        each presentacion in presentaciones 
+                            option(value=presentacion.id)= presentacion.presentacion
+                    span#errorPresentacion.error Debe seleccionar al menos una opción de presentacion
+
+                .form-group
+                    label(for="nombreComercial") Nombre Comercial(Opcional):  
+                    input(type="text", id="nombreComercial", name="nombreComercial")
+
+                .form-group
+                    label(for="categoria") Categoría: 
+                    select(id="categoria", name="categoria")
+                        option(value="") Selecciona una opción
+                        each categoria in categorias    
+                            option(value=categoria.id)= categoria.categoria
+                    span#errorCategoria.error Debe seleccionar una opción de categoria
+
+                .form-group
+                    label(for="familia") Familia: 
+                    select(id="familia", name="familia")
+                        option(value="") Selecciona una opción
+                        each familia in familias 
+                            option(value=familia.id)= familia.familia
+                    span#errorFamilia.error Debe seleccionar una opción de familia
+
+                button(type="submit", class="btn") Registrar
+
+        .lista
+            h2 Lista Medicamentos
+            .buscador
+                form(id="searchForm", class="form-buscador", action="/medicamentos/buscar", method="POST")
+                    .form-group
+                        label(for="searchTerm") Buscar:
+                        input(type="text", id="searchTerm", name="searchTerm", class="form-control")
+            if medicamentos.length === 0
+                p No hay medicamentos disponibles
+            else
+                ul#medicamentosList
+                    each medicamento in medicamentos
+                        li
+                            a(href=`/medicamentos/detalle/${medicamento.id}`)
+                                | #{medicamento.nombre_generico}
+                
+                
+            
+                        
+    script(src="/js/validacionesMedicamentos.js")
+    script.
+        $(document).ready(function() {
+            $('#concentracion, #formaFarmaceutica, #presentacion').select2({
+                placeholder: "Selecciona una o más opciones",
+                allowClear: true,
+            });
+            $('#categoria, #familia').select2({
+                placeholder: "Selecciona una opcion",
+                allowClear: true,
+            });
+            $('#searchTerm').on('input', function() {
+                const searchTerm = $(this).val();
+                $.ajax({
+                    url: '/medicamentos/buscar',
+                    type: 'POST',
+                    data: { searchTerm: searchTerm },
+                    success: function(medicamentos) {
+                        const $medicamentoList = $('#medicamentosList');
+                        $medicamentoList.empty(); 
+                        
+                        if (medicamentos.length === 0) {
+                            $medicamentoList.append('<p>No hay medicamentos disponibles</p>');
+                        } else {
+                            medicamentos.forEach(function(medicamento) {
+                                const listItem = `
+                                    <li>
+                                        <a href="/medicamentos/detalle/${medicamento.id}">
+                                            ${medicamento.nombre_generico}
+                                        </a>
+                                    </li>
+                                `;
+                                $medicamentoList.append(listItem);
+                            });
+                        }
+                    },
+                    error: function(err) {
+                        console.error('Error al buscar medicamentos:', err);
+                    }
+                });
+            });
+            
+        });

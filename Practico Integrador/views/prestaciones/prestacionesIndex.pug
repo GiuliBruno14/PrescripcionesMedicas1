@@ -1,0 +1,82 @@
+extends ../layout
+
+block content
+    h1= pageTitle
+    .contenedorPrestaciones
+        .formulario
+            form(name="prestaciones",class="form-container", action="/prestaciones/registrar", method="POST")
+                input(type="hidden", id="prestacionId", name="prestacionId", value="null")
+                h2 Gestión Prestaciones
+                .form-group
+                    label(for="nombre") Nombre: 
+                    input(type="text", id="nombre", name="nombre")
+                    span#errorNombre.error Nombre debe tener entre 3 y 40 caracteres
+                    span#errorNombreNum.error Ingrese un nombre válido.
+                    span#errorNombreRepetido.error Nombre de prestacion repetido.
+
+                .form-group
+                    label(for="indicacion") Indicación:  
+                    select(id="indicacion", name="indicacion[]", multiple)
+                        each indicacion in indicaciones
+                            option(value=indicacion.id)= indicacion.indicacion
+                    span#errorIndicacion.error Debe seleccionar al menos una opción de indicación
+
+                button(type="submit", class="btn") Registrar prestación
+
+        .lista
+            h2 Lista Prestaciones
+            .buscador
+                form(id="searchForm", class="form-buscador", action="/prestaciones/buscar", method="POST")
+                    .form-group
+                        label(for="searchTerm") Buscar:
+                        input(type="text", id="searchTerm", name="searchTerm", class="form-control")
+            if prestaciones.length === 0
+                p No hay prestaciones disponibles
+            else
+                ul#PrestacionesList
+                    each prestacion in prestaciones
+                        li
+                            a(href=`/prestaciones/detalle/${prestacion.id}`)
+                                | #{prestacion.nombre}
+                             
+    script(src="/js/validacionesPrestaciones.js")
+
+    script.
+        $(document).ready(function() {
+            $('#indicacion').select2({
+                placeholder: "Selecciona una o más opciones",
+                allowClear: true,
+            });
+
+            $('#searchTerm').on('input', function() {
+                var searchTerm = $(this).val();
+                $.ajax({
+                    url: '/prestaciones/buscar',
+                    type: 'POST',
+                    data: { searchTerm: searchTerm },
+                    success: function(prestaciones) {
+                        var $prestacionesList = $('#PrestacionesList');
+                        $prestacionesList.empty(); 
+                        
+                        if (prestaciones.length === 0) {
+                            $prestacionesList.append('<p>No hay prestaciones disponibles</p>');
+                        } else {
+                            prestaciones.forEach(function(prestacion) {
+                                var listItem = `
+                                    <li>
+                                        <a href="/prestaciones/detalle/${prestacion.id}">
+                                            ${prestacion.nombre}
+                                        </a>
+                                    </li>
+                                `;
+                                $prestacionesList.append(listItem);
+                            });
+                        }
+                    },
+                    error: function(err) {
+                        console.error('Error al buscar prestaciones:', err);
+                    }
+                });
+            });
+            
+        });

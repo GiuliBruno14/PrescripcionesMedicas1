@@ -1,0 +1,257 @@
+extends ../layout
+
+block content
+    .contenedorPrescripcion
+        .formularioPrescripcion
+            form(name="prescripciones", class="form-container", action=`/prescripciones/actualizar/${prescripcion.prescripcion_id}`, method="POST")
+                input(type="hidden", id="prescripcionId", name="prescripcionId", value=prescripcion.prescripcion_id)
+                h2 Prescripción ID: #{prescripcion.prescripcion_id}
+                .botones
+                    a(href=`/prescripciones/verprescripciones`)
+                        h4 Ver prescripciones
+                .prescripcion
+                    .datos
+                        .form-group
+                            label(for="profesional") Profesional: 
+                            select(id="profesional", name="profesional")
+                                option(value="")
+                                each profesional in profesionales
+                                    if profesional.id === prescripcion.id_profesional
+                                        option(value=profesional.id, selected)= `${profesional.nombre} ${profesional.apellido}`
+                                    else
+                                        option(value=profesional.id)= `${profesional.nombre} ${profesional.apellido}`
+                            span#errorProfesional.error Debe seleccionar al menos una opción  
+
+                        .form-group
+                            label(for="paciente") Paciente:
+                            select(id="paciente", name="paciente")
+                                option(value="")
+                                each paciente in pacientes
+                                    if paciente.id === prescripcion.paciente_id
+                                        option(value=paciente.id, selected)= `${paciente.nombre} ${paciente.apellido} - ${paciente.documento}`
+                                    else
+                                        option(value=paciente.id)= `${paciente.nombre} ${paciente.apellido} - ${paciente.documento}`
+                            span#errorPaciente.error Debe seleccionar al menos una opción
+                        
+                        .form-group
+                            label(for="obraSocial") Obra Social:
+                            select(id="obraSocial", name="obraSocial")
+                                option(value="") Selecciona una obra social
+                                
+                            span#errorObraSocial.error Debe seleccionar al menos una opción
+                        
+                        .form-group
+                            label(for="plan") Plan:
+                            input(type="text", id="plan", name="plan", readonly)
+
+                        .form-group
+                            label(for="diagnostico") Diagnóstico:  
+                            textarea(type="text", id="diagnostico", name="diagnostico")= prescripcion.diagnostico
+                            span#errorDiagnostico.error Debe ingresar un diagnóstico válido.
+
+                        .form-group
+                            label(for="fechaPrescripcion") Fecha de Prescripción:  
+                            input(type="date", id="fechaPrescripcion", name="fechaPrescripcion",value=prescripcion.fechaPrescripcion.toISOString().split('T')[0], readonly)
+
+                        .form-group
+                            label(for="vigencia") Vigencia (Opcional):  
+                            input(type="date", id="vigencia", name="vigencia", value=(prescripcion.vigencia && prescripcion.vigencia !== '0000-00-00' ? new Date(prescripcion.vigencia).toISOString().split('T')[0] : ''), readonly)
+                        
+                        .medicamento-list
+                            h4 Medicamentos:
+                                ul#medicamentoList
+                            h4 Prestaciones:
+                                ul#prestacionList
+                            span#errorDatos.error Debe ingresar por lo menos un medicamento/prestación
+                        
+                        .form-group 
+                            label(for="observaciones") Observaciones/Resultados:
+                            textarea(type="text", id="observaciones", name="observaciones") 
+                                if prescripcion && prescripcion.observaciones
+                                    | #{prescripcion.observaciones}
+                            span#errorObservaciones.error Observación demasiado larga
+
+                    .medicamentos 
+                        .form-group
+                            label(for="medicamento") Medicamento:
+                            select(id="medicamento", name="medicamento")
+                                option(value="") Selecciona un medicamento
+                                each medicamento in medicamentos
+                                    if medicamento.id === prescripcion.medicamento_id
+                                        option(value=medicamento.id, selected)= medicamento.nombre_generico
+                                    else 
+                                        option(value=medicamento.id)= medicamento.nombre_generico
+                            span#errorMedicamento.error Debe seleccionar al menos una opción
+                        .form-group
+                            label(for="medicamentoC") Concentración:
+                            select(id="medicamentoC", name="concentracion")
+                                option(value="") Selecciona una concentración
+                            span#errorConcentracion.error Debe seleccionar una concentración válida
+                        .form-group
+                            label(for="medicamentoF") Forma Farmacéutica:
+                            select(id="medicamentoF", name="forma_farmaceutica")
+                                option(value="") Selecciona una forma farmacéutica
+                            span#errorFormaFarmaceutica.error Debe seleccionar una forma farmacéutica válida
+                        .form-group
+                            label(for="medicamentoP") Presentación:
+                            select(id="medicamentoP", name="presentacion")
+                                option(value="") Selecciona una presentación
+                            span#errorPresentacion.error Debe seleccionar una presentación válida
+                        .form-group
+                            label(for="dosis") Dosis:
+                            .row
+                                .col-md-4
+                                    input(type="num", id="dosis", name="dosis", class="form-control input-sm", value=prescripcion.cantidad)
+                                p  cada 
+                                .col-md-4 
+                                    input(type="num", id="intervalo", name="intervalo", class="form-control input-sm", value=prescripcion.intervalo_num)
+                                .col-md-4
+                                    select(id="unidad", name="unidad", class="form-select select-sm")
+                                        option(value="") 
+                                        option(value="hora(s)", selected=prescripcion.intervalo_unidad === 'hora(s)') Hora(s)
+                                        option(value="dia(s)",selected=prescripcion.intervalo_unidad === 'dia(s)') Día(s)
+                                        option(value="semana(s)",selected=prescripcion.intervalo_unidad === 'semana(s)') Semana(s)
+                            span#errorDosis.error Debe llenar todos los campos
+
+                        .form-group
+                            label(for="duracion") Duración:
+                            .row
+                                .col-md-4
+                                    input(type="num", id="cantidad", name="cantidad", class="form-control input-sm", value=prescripcion.duracion_cantidad)
+                                .col-md-4 
+                                    select(id="tiempo", name="tiempo", class="form-select select-sm")
+                                        option(value="") 
+                                        option(value="dia(s)", selected=prescripcion.duracion_unidad ==='dia(s)') Día(s)
+                                        option(value="semana(s)", selected=prescripcion.duracion_unidad==='semanas(s)') Semana(s)
+                                        option(value="mes(es)", selected=prescripcion.duracion_unidad==='mes(es)') Mes(es)
+                            span#errorDuracion.error Debe llenar todos los campos
+
+                        button(type="button", class="btn", id="addMedicamento") Añadir Medicamento
+
+                    .prestaciones   
+                        .form-group
+                            label(for="prestacion") Prestación:
+                            select(id="prestacion", name="prestacion")
+                                option(value="") Selecciona una prestacion
+                                each prestacion in prestaciones
+                                    if prestacion.id === prescripcion.prestacion_id 
+                                        option(value=prestacion.id, selected)= prestacion.nombre
+                                    else
+                                        option(value=prestacion.id)= prestacion.nombre
+                            span#errorPrestacion.error Debe seleccionar al menos una opción
+
+                        .form-group
+                            label(for="prestacionI") Indicación:
+                            select(id="prestacionI", name="prestacionI")
+                                option(value="")
+                            span#errorIndicacion.error Debe seleccionar una opción
+
+                        .form-group
+                            label(for="lado") Lado (Opcional):
+                            select(id="lado", name="lado[]")
+                                option(value="") Selecciona una opción
+                                option(value="Izquierdo") Izquierdo
+                                option(value="Derecho") Derecho
+                                option(value="Ambos") Ambos
+                        
+                        .form-group
+                            label(for="justificacion") Justificación Prestación:  
+                            textarea(type="text", id="justificacion", name="justificacion")
+                            span#errorJustificacion.error Debe ingresar una justificación.
+                        button(type="button", class="btn", id="addPrestacion") Añadir Prestación
+
+                button(type="submit", class="btn") Aceptar
+
+    script(src="/js/prescripcionScript.js")
+    script(src="/js/validacionesPrescripciones.js")
+
+    script.
+        $(document).ready(function() {
+            const prescripcion = !{JSON.stringify(prescripcion)};
+            const pacienteId = prescripcion.paciente_id;
+            const medicamentoId = prescripcion.medicamento_id;
+            const prestacionId = prescripcion.prestacion_id;
+
+            if (pacienteId) {
+                $.ajax({
+                    url: '/pacientes/datos/' + pacienteId,
+                    type: 'GET',
+                    success: function(obrasSociales) {
+                        const $obraSocialSelect = $('#obraSocial');
+                        $obraSocialSelect.empty();
+                        $obraSocialSelect.append('<option value="">Selecciona una obra social</option>');
+                        obrasSociales.forEach(function(obraSocial) {
+                            if (obraSocial.id == prescripcion.obra_social_id) {
+                                $obraSocialSelect.append('<option value="' + obraSocial.id + '" selected>' + obraSocial.nombre + '</option>');
+                            } else {
+                                $obraSocialSelect.append('<option value="' + obraSocial.id + '">' + obraSocial.nombre + '</option>');
+                            }
+                        });
+                        $('#plan').val(prescripcion.plan_nombre);
+                    },
+                    error: function(err) {
+                        console.error('Error al obtener obras sociales del paciente:', err);
+                    }
+                });
+            }
+
+            if (prescripcion.medicamentos && prescripcion.medicamentos !== "") {
+                prescripcion.medicamentos.split('; ').forEach(function (medicamentoInfo) {
+                    const [medicamentoId, medicamentoNombre, cid,concentracion,fid, formaFarmaceutica, pid,presentacion, dosis, intervalo, unidad, cantidad, tiempo] = medicamentoInfo.split('_');
+                    addMedicamento(medicamentoId, medicamentoNombre, cid,concentracion,fid, formaFarmaceutica, pid,presentacion, dosis, intervalo, unidad, cantidad, tiempo);
+                });
+                mostrarPrestaciones();
+            } else {
+                mostrarPrestaciones();
+            }
+
+            function mostrarPrestaciones() {
+                if(prescripcion.prestaciones && prescripcion.prestaciones !== ""){
+                    prescripcion.prestaciones.split('; ').forEach(function (prestacionInfo){
+                        if (prestacionInfo) { // Verifica si la cadena no es nula
+                            const [prestacionId, prestacionNombre, inid, indicacion, lado, justificacion] = prestacionInfo.split('_');
+                            addPrestacion(prestacionId, prestacionNombre, inid, indicacion, lado, justificacion);
+                        }
+                    });
+                }
+            }
+
+            function addMedicamento(medicamentoId, medicamentoNombre, cid,concentracion,fid, formaFarmaceutica, pid,presentacion, dosis, intervalo, unidad, cantidad, tiempo) {
+                const medicamentoItem = `
+                    <li>
+                        ${medicamentoNombre} - ${concentracion} - ${formaFarmaceutica} - ${presentacion} Dosis: ${dosis} cada ${intervalo} ${unidad} Duración: ${cantidad} ${tiempo}
+                        <input type="hidden" name="medicamentos[${medicamentoId}][medicamento]" value="${medicamentoId}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][concentracion]" value="${cid}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][forma_farmaceutica]" value="${fid}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][presentacion]" value="${pid}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][dosis]" value="${dosis}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][intervalo]" value="${intervalo}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][unidad]" value="${unidad}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][cantidad]" value="${cantidad}">
+                        <input type="hidden" name="medicamentos[${medicamentoId}][tiempo]" value="${tiempo}"> 
+                        <button type="button" class="btn-eliminar">x</button>
+                    </li>
+                `;
+                $('#medicamentoList').append(medicamentoItem);
+            }
+
+            function addPrestacion(prestacionId, prestacionNombre,inid, indicacion, lado, justificacion){
+                const prestacionItem = `
+                <li>
+                    ${prestacionNombre} - ${indicacion} ${lado ? '- Lado: ' + lado : ''} Justificación: ${justificacion}
+                    <input type="hidden" name="prestaciones[${prestacionId}][prestacion]" value="${prestacionId}">
+                    <input type="hidden" name="prestaciones[${prestacionId}][indicacion]" value="${inid}">
+                    <input type="hidden" name="prestaciones[${prestacionId}][lado]" value="${lado}">
+                    <input type="hidden" name="prestaciones[${prestacionId}][justificacion]" value="${justificacion}">
+                    <button type="button" class="btn-eliminar">x</button>
+                </li>
+                `;
+                $('#prestacionList').append(prestacionItem);
+            }
+            function deshabilitarSelect(select) {
+                if (select.value) {
+                    select.disabled = true;
+                }
+            }
+            deshabilitarSelect(document.getElementById('profesional'));
+        });

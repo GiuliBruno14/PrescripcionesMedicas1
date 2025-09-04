@@ -1,0 +1,36 @@
+extends layout
+
+block content
+    - var pageTitle = "Iniciar Sesión"
+    .contenedorLogin
+        form(id="formLogin" action="/", method="POST")
+            h2 Iniciar sesión
+            .input-field
+                label(for="username") Nombre de usuario
+                input(type="username", id="username", name="username", placeholder="Ingresa tu nombre de usuario")
+                span#errorUsername.error Ingrese un nombre de usuario
+            .input-field
+                label(for="password") Contraseña
+                input(type="password", id="password", name="password", class="registro", placeholder="Ingresa tu contraseña")
+                button(type="button", id="togglePassword", class="toggle-password") Mostrar
+                span#errorPassword.error Ingrese una contraseña
+            button(type="submit", class="login") Ingresar
+            span#errorCredenciales.error Usuario o contraseña incorrectos
+            span#errorEstado.error Profesional Inactivo
+
+    script(src="/js/validacionesLogin.js")
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordButton = document.getElementById('togglePassword');
+        
+            togglePasswordButton.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    togglePasswordButton.textContent = 'Ocultar';
+                } else {
+                    passwordInput.type = 'password';
+                    togglePasswordButton.textContent = 'Mostrar';
+                }
+            });
+        });

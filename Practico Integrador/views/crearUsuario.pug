@@ -1,0 +1,57 @@
+extends layout
+
+block content
+    - var pageTitle = "Crear Usuario"
+    .contenedorRegistro
+        form(id="formRegistro" action="/registro/registrar", method="POST")
+            h2 Registro de Usuario
+            .input-field
+                label(for="username") Nombre de usuario
+                input(type="username", id="username", name="username", placeholder="Ingresa tu nombre de usuario")
+                span#errorUsername.error Nombre de usuario muy corto
+                span#errorUsernameExistente.error Nombre de usuario ya existente
+            .input-field
+                label(for="password") Contraseña
+                input(type="password", id="password", name="password", class="registro", placeholder="Ingresa tu contraseña")
+                button(type="button", id="togglePassword", class="toggle-password") Mostrar
+                span#errorPassword.error Contraseña muy corta
+            .input-field
+                label(for="rol") Rol
+                select(id="rol" name="rol")
+                    option(value="admin") Administrador
+                    option(value="profesional") Profesional
+                span#errorRol.error Debe seleccionar un rol 
+            .input-field#matricula-field(style={display: 'none'})
+                label(for="matricula") Matrícula
+                input(type="text", id="matricula", name="matricula",class="registro", placeholder="Ingresa la matrícula")
+                span#errorMatricula.error Matrícula muy corta 
+                span#errorMatriculaExistente.error Matrícula ya utilizada 
+                span#errorMatriculaNoExistente.error Matrícula no existente
+            button(type="submit", class="login") Registrarse
+
+    script(src="/js/validacionesRegistrar.js")
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordButton = document.getElementById('togglePassword');
+            const rolSelect = document.getElementById('rol');
+            const matriculaField = document.getElementById('matricula-field');
+        
+            togglePasswordButton.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    togglePasswordButton.textContent = 'Ocultar';
+                } else {
+                    passwordInput.type = 'password';
+                    togglePasswordButton.textContent = 'Mostrar';
+                }
+            });
+
+            rolSelect.addEventListener('change', function() {
+                if (rolSelect.value === 'profesional') {
+                    matriculaField.style.display = 'block';
+                } else {
+                    matriculaField.style.display = 'none';
+                }
+            });
+        });

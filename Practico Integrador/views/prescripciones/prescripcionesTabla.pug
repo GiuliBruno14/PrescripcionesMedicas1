@@ -1,0 +1,56 @@
+extends ../layout
+
+block content 
+    h1 Listado de Prescripciones
+    input(type='text', id='searchInput', placeholder='Buscar prescripciones...')
+    table#prescripcionesTable
+      thead
+        tr
+          th ID
+          th Fecha de Prescripción
+          th Diagnóstico
+          th Profesional
+          th Paciente
+          th Medicamentos
+          th Prestaciones
+          th Acciones
+      tbody
+        each prescripcion in prescripciones
+            tr(data-href=`/prescripciones/detalle/${prescripcion.prescripcion_id}`)
+                td= prescripcion.prescripcion_id
+                td= prescripcion.fechaPrescripcion.toISOString().split('T')[0]
+                td= prescripcion.diagnostico
+                td= prescripcion.profesional
+                td= prescripcion.paciente
+                td= prescripcion.medicamentos
+                td= prescripcion.prestaciones
+                if prescripcion.estadoPaciente
+                    td
+                        a(href=`/prescripciones/${prescripcion.prescripcion_id}`)
+                            img(src="/imagenes/editar.png", alt="Editar")
+
+    script.
+        $(document).ready(function() {
+            $('#prescripcionesTable tbody tr').on('click', function() {
+                var location = $(this).data('href');
+                if (location) {
+                    window.location.href = location;
+                }
+            });
+
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#prescripcionesTable tbody tr").filter(function() {
+                    var rowMatches = false;
+                    $(this).find('td').each(function() {
+                        var text = $(this).text().toLowerCase();
+                        if (text.indexOf(value) !== -1) {
+                            rowMatches = true;
+                            return false;
+                        }
+                    });
+                    $(this).toggle(rowMatches);
+                });
+            });
+        });
+

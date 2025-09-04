@@ -1,0 +1,33 @@
+extends ../layout
+
+block content
+    h1= prestacion.nombre
+    .contenedorPrestaciones
+        .formularioModificar
+            form(class="form-container", action=`/prestaciones/actualizar/${prestacion.id}`, method="POST")
+                input(type="hidden", id="prestacionId", name="prestacionId", value=prestacion.id)
+                h2 Gestión Prestaciones
+                .form-group
+                    label(for="nombre") Nombre:
+                    input(type="text", id="nombre", name="nombre", value=prestacion.nombre)
+                    span#errorNombre.error Nombre debe tener entre 3 y 30 caracteres
+                    span#errorNombreNum.error Ingrese un nombre válido.
+                    span#errorNombreRepetido.error Nombre de prestacion repetido.
+
+                .form-group
+                    label(for="indicacion") Indicación:
+                    select(id="indicacion", name="indicacion[]", multiple)
+                        each indicacion in indicaciones
+                            option(value=indicacion.id, selected=(indicacionesId.includes(indicacion.id) ? 'selected' : undefined))= indicacion.indicacion
+                    span#errorIndicacion.error Debe seleccionar al menos una opción de indicación.
+
+                button(type="submit", class="btn") Guardar cambios
+
+    script(src="/js/validacionesPrestaciones.js")
+    script.
+        $(document).ready(function() {
+            $('#indicacion').select2({
+                placeholder: "Selecciona una o más opciones",
+                allowClear: true,
+            });
+        });
